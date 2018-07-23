@@ -30,12 +30,16 @@ var command = commandList[2];
 //See which command was initiated and call the necessary API
 
 if (command == 'my-tweets') {
+    appendCommand();
     myTweets();
 } else if (command == 'spotify-this-song') {
+    appendCommand();
     spotifyThis();
 } else if (command == 'movie-this') {
+    appendCommand();
     movieThis();
 } else if (command == 'do-what-it-says') {
+    appendCommand();
     doWhatItSays();
 } else {
     invalidInput();
@@ -47,15 +51,22 @@ if (command == 'my-tweets') {
 
 
 function myTweets() {
-    var params = { screen_name: 'montypython'};
+    var params = { screen_name: 'montypython' };
 
     client.get('statuses/user_timeline', params, function (error, tweets, response) {
         if (!error) {
             //console.log(tweets);
 
+            var logData = {};
+            var logArray = []
+
             for (i = 0; i < 20; i++) {
                 console.log(tweets[i].created_at + ': ' + tweets[i].text);
+                logArray[i] = tweets[i].created_at + ': ' + tweets[i].text +'\n' ;
             }//close for loop
+
+            logData.tweets = logArray;
+            appendLogData(logData);
         }
     });
 
@@ -77,11 +88,18 @@ function spotifyThis() {
             return console.log('Error occurred: ' + err);
         }
 
+        var logData = {};
         //console.log(data.tracks.items[0]);
         console.log('Artist: ' + data.tracks.items[0].artists[0].name);
+        logData.Artist = data.tracks.items[0].artists[0].name;
         console.log('Title: ' + data.tracks.items[0].name);
+        logData.Title = data.tracks.items[0].name;
         console.log('Release Date: ' + data.tracks.items[0].release_date);
+        logData.Release = data.tracks.items[0].release_date
         console.log('Preview: ' + data.tracks.items[0].preview_url);
+        logData.PreviewURL = data.tracks.items[0].preview_url;
+
+        appendLogData(logData);
 
     });
 }; // end spotify function
@@ -103,14 +121,25 @@ function movieThis() {
     request(queryUrl, function (error, response, body) {
         if (!error && response.statusCode === 200) {
             var movieInfo = JSON.parse(body);
+            var logData = {};
             console.log('Title: ' + movieInfo.Title);
+            logData.Title = movieInfo.Title;
             console.log('Year Released: ' + movieInfo.Year);
+            logData.Release = movieInfo.Year;
             console.log('IMDB Rating: ' + movieInfo.Ratings[0].Value);
+            logData.IMDBRating = movieInfo.Ratings[0].Value;
             console.log('Rotten Tomatoes Rating: ' + movieInfo.Ratings[1].Value);
+            logData.RottenTomatoes = movieInfo.Ratings[1].Value
             console.log('Produced in: ' + movieInfo.Country);
+            logData.Produced = movieInfo.Country;
             console.log('Language: ' + movieInfo.Language);
+            logData.Language = movieInfo.Language;
             console.log('Summary: ' + movieInfo.Plot);
+            logData.Plot = movieInfo.Plot;
             console.log('Actors: ' + movieInfo.Actors);
+            logData.Actors = movieInfo.Actors;
+
+            appendLogData(logData);
         }
     });
 };// end movie this function
@@ -164,3 +193,21 @@ function queryBuilder() {
         }
     }
 };
+
+function appendCommand() {
+    fs.appendFile('logFile.txt', command + ': \n', function (err) {
+        if (err) {
+            console.log(err);
+        } else { }
+
+    });
+};
+
+function appendLogData(logData) {
+    fs.appendFile('logFIle.txt', JSON.stringify(logData) + '\n', function (err) {
+        if (err) {
+            console.log(err);
+        } else { }
+
+    });
+}
