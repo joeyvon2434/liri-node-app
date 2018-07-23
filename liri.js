@@ -3,9 +3,12 @@
 require("dotenv").config();
 
 var query = '';
+var useQueryBuilder = true;
 
 var Twitter = require('twitter');
 var Spotify = require('node-spotify-api');
+var request = require('request');
+var fs = require('fs');
 
 
 //bring in keys from local key file
@@ -44,13 +47,13 @@ if (command == 'my-tweets') {
 
 
 function myTweets() {
-    var params = { screen_name: 'JosephVonEdwins' };
+    var params = { screen_name: 'montypython'};
 
     client.get('statuses/user_timeline', params, function (error, tweets, response) {
         if (!error) {
             //console.log(tweets);
 
-            for (i = 0; i < 2; i++) {
+            for (i = 0; i < 20; i++) {
                 console.log(tweets[i].created_at + ': ' + tweets[i].text);
             }//close for loop
         }
@@ -61,7 +64,9 @@ function myTweets() {
 
 
 function spotifyThis() {
-    queryBuilder() ;
+    queryBuilder();
+
+    console.log(query);
 
     if (query == '') {
         query = 'the sign ace of base';
@@ -84,13 +89,55 @@ function spotifyThis() {
 
 
 function movieThis() {
-    console.log('movie');
+
+    queryBuilder();
+
+    if (query == '') {
+        query = 'Mr. Nobody';
+    }
+
+    var queryUrl = query.replace(' ', '+');
+
+    queryUrl = "http://www.omdbapi.com/?t=" + queryUrl + "&y=&plot=short&apikey=trilogy"
+
+    request(queryUrl, function (error, response, body) {
+        if (!error && response.statusCode === 200) {
+            var movieInfo = JSON.parse(body);
+            console.log('Title: ' + movieInfo.Title);
+            console.log('Year Released: ' + movieInfo.Year);
+            console.log('IMDB Rating: ' + movieInfo.Ratings[0].Value);
+            console.log('Rotten Tomatoes Rating: ' + movieInfo.Ratings[1].Value);
+            console.log('Produced in: ' + movieInfo.Country);
+            console.log('Language: ' + movieInfo.Language);
+            console.log('Summary: ' + movieInfo.Plot);
+            console.log('Actors: ' + movieInfo.Actors);
+        }
+    });
 };// end movie this function
 
-
-
 function doWhatItSays() {
-    console.log('do what');
+
+    fs.readFile("random.txt", "utf8", function (error, data) {
+        if (error) {
+            return console.log('Error: ' + error);
+        }
+
+        var randomText = data.split(",");
+
+        command = randomText[0];
+        query = randomText[1];
+
+        useQueryBuilder = false;
+
+        if (command == 'my-tweets') {
+            myTweets();
+        } else if (command == 'spotify-this-song') {
+            spotifyThis();
+        } else if (command == 'movie-this') {
+            movieThis();
+        }
+    });
+
 };// end do what it says function
 
 
@@ -107,12 +154,13 @@ function invalidInput() {
 
 
 function queryBuilder() {
-
-    if (commandList[3] == null) {
-        query = '';
-    } else {
-        for (i = 3; i < commandList.length; i++) {
-            query = query + ' ' + commandList[i];
+    if (useQueryBuilder) {
+        if (commandList[3] == null) {
+            query = '';
+        } else {
+            for (i = 3; i < commandList.length; i++) {
+                query = query + ' ' + commandList[i];
+            }
         }
     }
 };
