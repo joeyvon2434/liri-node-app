@@ -2,11 +2,18 @@
 Practice using Node by making a command line app
 
 The liri command line app takes in a few different inputs from the command line and outputs 
-the requested information. The acceptable commands are:
+the requested information.
+
+All commands start with "node liri"
+
+ The acceptable commands are:
 1. my-tweets
 2. spotify-this-song 'song name'
 3. movie-this 'movie name'
 4. do-what-it-says
+
+For example, in the command line type "node liri my-tweets" to get recent tweets.
+or " node liri movie-this it", etc...
 
 For movie-this and spotify-this-song, input the movie or song name after the command. 
 
